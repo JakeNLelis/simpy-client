@@ -12,6 +12,7 @@ function Register() {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   // Handle user's input changes
@@ -22,6 +23,8 @@ function Register() {
   // Submit registration handler
   const registerUser = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(""); // Clear previous errors
 
     // Send registration request to the server
     try {
@@ -30,11 +33,12 @@ function Register() {
         userData
       );
       if (response.statusText == "Created") navigate("/login");
-      console.log(response);
     } catch (err) {
       setError(
         err.response?.data?.message || "Registration failed. Please try again."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,7 +87,14 @@ function Register() {
             Already have an account? <Link to="/login">Sign in</Link>
           </p>
           <button type="submin" className="btn primary">
-            Register
+            {isLoading ? (
+              <>
+                <span className="spinner"></span>
+                Registering...
+              </>
+            ) : (
+              "Register"
+            )}
           </button>
         </form>
       </div>
