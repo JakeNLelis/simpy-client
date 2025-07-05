@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Link } from "react-router-dom";
 import { CiSearch } from "react-icons/ci";
 import ProfileImage from "./ProfileImage";

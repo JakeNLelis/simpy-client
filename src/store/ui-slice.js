@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  themModalIsOpen: false,
+  themeModalIsOpen: false,
   editProfileModalIsOpen: false,
   editPostModalIsOpen: false,
   editPostId: "",
@@ -16,10 +16,10 @@ const uiSlice = createSlice({
   initialState,
   reducers: {
     openThemeModal: (state) => {
-      state.themModalIsOpen = true;
+      state.themeModalIsOpen = true;
     },
     closeThemeModal: (state) => {
-      state.themModalIsOpen = false;
+      state.themeModalIsOpen = false;
     },
     changeTheme: (state, action) => {
       state.theme = action.payload;
