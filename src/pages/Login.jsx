@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { userActions } from "../store/user-slice";
 
 function Login() {
   const [userData, setUserData] = useState({
@@ -12,6 +14,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Handle user's input changes
   const changInputHandler = (e) => {
@@ -30,7 +33,11 @@ function Login() {
         `${import.meta.env.VITE_API_URL}/users/login`,
         userData
       );
-      if (response.statusText == "OK") navigate("/");
+      if (response.statusText == "OK") {
+        dispatch(userActions.changeCurrentUser(response.data));
+        localStorage.setItem("currentUser", JSON.stringify(response.data));
+        navigate("/");
+      }
     } catch (err) {
       setError(
         err.response?.data?.message || "Login failed. Please try again."
