@@ -1321,6 +1321,119 @@ MESSAGE BOX
 }
 
 /*==========================================================
+NOT FOUND PAGE
+==========================================================*/
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  padding: 0 1rem;
+  min-height: 100vh;
+}
+
+.notFound__title {
+  font-size: 6rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin-bottom: 0;
+}
+
+.notFound__divider {
+  height: 0.25rem;
+  width: 4rem;
+  border-radius: var(--radius-1);
+  background: var(--color-primary);
+  margin: 0 0 1.75rem;
+}
+
+.notFound__heading {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-gray-800);
+  margin-bottom: 1rem;
+}
+
+.notFound__description {
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  color: var(--color-gray-500);
+  max-width: 28rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.notFound__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.notFound__btn {
+  padding: 0.625rem 1.75rem;
+  border-radius: var(--radius-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  cursor: pointer;
+  border: none;
+  display: inline-block;
+}
+
+.notFound__btn--primary {
+  background: var(--color-gray-800);
+  color: var(--color-gray-0);
+}
+
+.notFound__btn--primary:hover {
+  background: var(--color-gray-900);
+  transform: scale(0.95);
+}
+
+.notFound__btn--secondary {
+  border: 1px solid var(--color-gray-300);
+  background: transparent;
+  color: var(--color-gray-800);
+}
+
+.notFound__btn--secondary:hover {
+  background: var(--color-gray-100);
+  transform: scale(0.95);
+}
+
+@media screen and (max-width: 768px) {
+  .notFound {
+    padding: 0 1rem;
+  }
+
+  .notFound__title {
+    font-size: 5rem;
+  }
+
+  .notFound__heading {
+    font-size: 1.25rem;
+  }
+
+  .notFound__description {
+    font-size: 0.875rem;
+  }
+
+  .notFound__actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .notFound__btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/*==========================================================
 MEDIA QUERIES (small screens)
 ==========================================================*/
 @media screen and (max-width: 600px) {
