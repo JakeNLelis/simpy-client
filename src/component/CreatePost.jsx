@@ -1,58 +1,67 @@
-import React from "react";
+/* eslint-disable no-unused-vars */
+import React, { useRef, useState } from "react";
 import ProfileImage from "./ProfileImage";
 import { useSelector } from "react-redux";
 import { SlPicture } from "react-icons/sl";
 
-function CreatePost({ onCreatePost, error }) {
+function CreatePost({ onCreatePost }) {
   const { profilePhoto } = useSelector((state) => state.user.currentUser);
-  const [body, setBody] = React.useState("");
-  const [image, setImage] = React.useState(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const formRef = useRef();
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
-  const createPost = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const formData = new FormData();
-    formData.set("body", body);
-    if (image) {
-      formData.set("image", image);
-    }
+  function formAction(formData) {
     onCreatePost(formData);
-    setBody("");
-    setImage(null);
-    setIsLoading(false);
+    formRef.current.reset();
+    // Clear image preview after submission
+    setSelectedImage(null);
+    setImagePreview(null);
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    // Clear the file input
+    const fileInput = document.getElementById("image");
+    if (fileInput) fileInput.value = "";
   };
 
   return (
-    <form
-      action=""
-      className="createPost"
-      encType="multipart/form-data"
-      onSubmit={createPost}
-    >
-      {error && <p className="createPost__error-message">{error}</p>}
+    <form action={formAction} className="createPost" ref={formRef}>
       <div className="createPost__top">
         <ProfileImage image={profilePhoto} />
         <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
+          name="body"
           placeholder="What's on your mind?"
           required
         ></textarea>
       </div>
-      {image && (
+
+      {/* Image Preview */}
+      {imagePreview && (
         <div className="createPost__image-preview">
-          <img src={URL.createObjectURL(image)} alt="Preview" />
+          <img src={imagePreview} alt="Preview" />
           <button
             type="button"
             className="createPost__image-delete"
-            onClick={() => setImage(null)}
+            onClick={removeImage}
             aria-label="Remove image"
           >
             ×
           </button>
         </div>
       )}
+
       <div className="createPost__bottom">
         <div className="createPost__actions">
           <label htmlFor="image">
@@ -61,19 +70,11 @@ function CreatePost({ onCreatePost, error }) {
           <input
             type="file"
             id="image"
-            onChange={(e) => setImage(e.target.files[0])}
+            name="image"
             accept="image/*"
+            onChange={handleImageChange}
           />
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <span className="spinner"></span>
-                Posting...
-              </>
-            ) : (
-              "Post"
-            )}
-          </button>
+          <button type="submit">Post</button>
         </div>
       </div>
     </form>

@@ -1,70 +1,98 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import {
+  Suspense,
+  useMemo,
+  useOptimistic,
+  startTransition,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
 import CreatePost from "../component/CreatePost";
-import axios from "axios";
 import Feeds from "../component/Feeds";
+import { getPosts, createPost } from "../api/post";
+import PostsLoader from "../component/PostsLoader";
 
 function Home() {
-  const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
   const token = useSelector((state) => state.user.currentUser.token);
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const [posts, setPosts] = useState([]);
 
-  const createPost = async (postData) => {
-    setError("");
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/posts`,
-        postData,
-        {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const newPost = response.data;
-      setPosts([newPost, ...posts]);
-    } catch (err) {
-      setError(
-        err.response.data.message ||
-          "An error occurred while creating the post."
-      );
-    }
+  const postsPromise = getPosts(token);
+
+  // React 19 useOptimistic for immediate UI updates
+  const [optimisticPosts, addOptimisticPost] = useOptimistic(
+    posts,
+    (state, newPost) => [
+      {
+        ...newPost,
+        sending: true,
+      },
+      ...state,
+    ]
+  );
+
+  // Enhanced create post function with optimistic updates
+  const handleCreatePost = async (postData) => {
+    const optimisticPost = {
+      _id: `temp-${Date.now()}`,
+      body: postData.get("body"),
+      image: postData.get("image")
+        ? URL.createObjectURL(postData.get("image"))
+        : null,
+      // Match the server response structure exactly
+      creator: {
+        _id: currentUser.id,
+        fullName: currentUser.name,
+        profilePhoto: currentUser.profilePhoto,
+      },
+      createdAt: new Date().toISOString(),
+      likes: [],
+      comments: [],
+    };
+
+    // Add optimistic post immediately
+    addOptimisticPost(optimisticPost);
+
+    startTransition(async () => {
+      try {
+        const newPost = await createPost(postData, token);
+
+        const completePost = {
+          ...newPost,
+          creator: {
+            ...newPost.creator,
+            profilePhoto:
+              newPost.creator.profilePhoto || currentUser.profilePhoto,
+            fullName: newPost.creator.fullName || currentUser.name,
+          },
+        };
+
+        startTransition(() => {
+          setPosts((currentPosts) => [completePost, ...currentPosts]);
+        });
+      } catch (error) {
+        console.error("Error creating post:", error);
+        startTransition(() => {
+          setPosts((currentPosts) => currentPosts);
+        });
+      }
+    });
   };
-
-  const getPosts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/posts`,
-        {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // Handle successful response
-      setPosts(response.data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getPosts();
-  }, [setPosts]);
-
-  console.log(posts);
 
   return (
     <section className="mainArea">
-      <CreatePost onCreatePost={createPost} error={error} />
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <Feeds posts={posts} onSetPosts={setPosts} />
-      )}
+      <CreatePost onCreatePost={handleCreatePost} />
+      <Suspense
+        fallback={
+          <div>
+            <span className="spinner"></span>
+            Loading posts...
+          </div>
+        }
+      >
+        <PostsLoader postsPromise={postsPromise} setPosts={setPosts} />
+        <Feeds posts={optimisticPosts} />
+      </Suspense>
     </section>
   );
 }

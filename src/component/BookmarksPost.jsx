@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import axios from "axios";
 import React, { useEffect } from "react";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
@@ -5,9 +6,7 @@ import { useSelector } from "react-redux";
 
 function BookmarksPost({ post }) {
   const [user, setUser] = React.useState({});
-  const [postBookmarked, setPostBookmarked] = React.useState(
-    user.bookmarks?.includes(post._id)
-  );
+  const [postBookmarked, setPostBookmarked] = React.useState(false);
   const token = useSelector((state) => state.user.currentUser.token);
   const userId = useSelector((state) => state.user.currentUser.id);
 
@@ -22,6 +21,7 @@ function BookmarksPost({ post }) {
           },
         }
       );
+      setPostBookmarked(response.data.bookmarks?.includes(post._id));
       setUser(response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import ProfileImage from "./ProfileImage";
@@ -9,7 +10,7 @@ import { IoMdShare } from "react-icons/io";
 import TrimText from "../helpers/TrimText";
 import BookmarksPost from "./BookmarksPost";
 
-function Feed({ post }) {
+function Feed({ post, isPending }) {
   const userId = useSelector((state) => state.user.currentUser.id);
   const creator = post.creator;
   const [showFeedHeaderMenu, setShowFeedHeaderMenu] = React.useState(false);
@@ -17,12 +18,13 @@ function Feed({ post }) {
   const location = useLocation();
 
   return (
-    <article className="feed">
+    <article className={`feed ${isPending ? "feed--pending" : ""}`}>
+      {isPending && <div className="feed__pending-indicator">Posting...</div>}
       <header className="feed__header">
         <Link to={`/users/${creator._id}`} className="feed__header-profile">
-          <ProfileImage image={creator.profilePhoto} />
+          <ProfileImage image={post.creator.profilePhoto} />
           <div>
-            <h4>{creator.fullName}</h4>
+            <h4>{post.creator.fullName}</h4>
             <small>
               <TimeAgo date={post.createdAt} />
             </small>
